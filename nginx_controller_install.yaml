@@ -3,9 +3,5 @@
   remote_user: ubuntu
   gather_facts: yes
   
-  tasks:
-    - name: VIEW OS VERSION
-       debug: "System {{ inventory_hostname }}"
-  
 - debug:
     msg: "System {{ inventory_hostname }} has uuid {{ ansible_product_uuid }}"
