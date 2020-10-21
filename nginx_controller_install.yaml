@@ -1,12 +1,12 @@
-## on the remote host
 - hosts: all
   remote_user: azureuser
   become: yes
   become_method: sudo
   gather_facts: yes
 
-  # Supporting su requirement for Controller installer role
-  - name: set root password to support su for Controller installation with Ubuntu
+  tasks:
+
+  - name: set root password
     user:
       name: root
       password: "{{ su_password | password_hash('sha512') }}"
