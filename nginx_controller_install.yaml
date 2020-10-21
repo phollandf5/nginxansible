@@ -5,6 +5,14 @@
   gather_facts: yes
 
   tasks:
+  
+  - name: Copy file with owner and permissions
+    copy:
+      src: /home/azureuser/ansible-tower-setup-bundle-3.7.0-4.tar.gz
+      dest: "{{playbook_dir}}"
+      owner: foo
+      group: foo
+      mode: '0644'
 
   - name: set root password
     user:
