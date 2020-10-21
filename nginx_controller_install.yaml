@@ -8,4 +8,5 @@
   - name: set root password to support su for Controller installation with Ubuntu
     user:
       name: root
+      password: "{{ su_password | password_hash('sha512') }}"
      
