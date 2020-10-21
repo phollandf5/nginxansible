@@ -3,3 +3,5 @@
   hosts: localhost
   remote_user: ubuntu
   gather_facts: yes
+  
+- debug: var=ansible_facts
