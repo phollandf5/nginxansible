@@ -5,6 +5,14 @@
   gather_facts: yes
 
   tasks:  
+  
+  - name: copy the controller tar archive to the remote host
+    copy:
+      src: "/home/azureuser/{{nginx_controller_tarball}}"
+      dest: "{{playbook_dir}}/{{nginx_controller_tarball}}"
+      owner: azureuser
+      group: ubuntu
+      force: yes
 
   - name: set root password
     user:
