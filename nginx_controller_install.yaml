@@ -1,8 +1,9 @@
-## on the remote host
 - name: DEPLOY
   hosts: localhost
   remote_user: ubuntu
   gather_facts: yes
   
-- name: DEBUG
-  debug: var=ansible_facts
+  tasks:
+    - name: VIEW OS VERSION
+       debug: ansible_net_version
+  
