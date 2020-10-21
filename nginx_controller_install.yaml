@@ -1,5 +1,6 @@
 ## on the remote host
-- hosts: localhost
+- name: DEPLOY
+  hosts: localhost
   remote_user: ubuntu
   become: yes
   become_method: sudo
