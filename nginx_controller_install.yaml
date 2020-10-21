@@ -1,2 +1,3 @@
 - name: DEPLOY
+  hosts: controller
   gather_facts: yes
