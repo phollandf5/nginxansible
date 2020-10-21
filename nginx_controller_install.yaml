@@ -1,5 +1,6 @@
 ## on the remote host
-- remote_user: ubuntu
+- hosts: localhost
+  remote_user: ubuntu
   become: yes
   become_method: sudo
   gather_facts: yes
