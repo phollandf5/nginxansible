@@ -1,3 +1,6 @@
 - name: DEPLOY
   hosts: all
   gather_facts: yes
+  remote_user: azureuser
+  become: yes
+  become_method: sudo
