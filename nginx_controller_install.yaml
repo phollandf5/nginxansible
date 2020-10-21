@@ -6,5 +6,5 @@
   tasks:
     - name: VIEW OS VERSION
        debug:
-         msg: ansible_net_version
+         msg: "HELLO"
   
