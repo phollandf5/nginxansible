@@ -1,3 +1,4 @@
+---
 - name: DEPLOY
   hosts: all
   gather_facts: yes
@@ -5,7 +6,8 @@
   become: yes
   become_method: sudo
   
-  - name: set root password to support su for Controller installation with Ubuntu
-    user:
-      name: root
-      password: "{{ su_password | password_hash('sha512') }}"
+- name: set root password to support su for Controller installation with Ubuntu
+  user:
+    name: root
+    password: "{{ su_password | password_hash('sha512') }}"
+
