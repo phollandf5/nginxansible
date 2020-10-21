@@ -6,5 +6,5 @@
   tasks:
     - name: VIEW OS VERSION
        debug:
-         msg: "MY AS3 output {{ as3_output }}"
+         msg: ansible_net_version
   
