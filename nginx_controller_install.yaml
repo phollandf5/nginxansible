@@ -15,8 +15,8 @@
     copy:
       src: "/opt/{{nginx_controller_tarball}}"
       dest: "/opt/{{nginx_controller_tarball}}"
-      owner: ubuntu
-      group: ubuntu
+      owner: azureuser
+      group: azureuser
       force: yes
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
