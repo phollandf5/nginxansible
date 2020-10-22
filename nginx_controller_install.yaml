@@ -10,8 +10,6 @@
     copy:
       src: "/opt/{{nginx_controller_tarball}}"
       dest: "{{playbook_dir}}/{{nginx_controller_tarball}}"
-      owner: azureuser
-      group: ubuntu
       force: yes
     vars:
       nginx_controller_tarball: "controller-installer-3.9.0.tar.gz"
