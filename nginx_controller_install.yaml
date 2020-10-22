@@ -13,6 +13,9 @@
       owner: azureuser
       group: ubuntu
       force: yes
+    vars:
+      nginx_controller_install_path: "{{ ansible_env.HOME }}"
+      nginx_controller_tarball: "controller-installer-<>.tar.gz"
 
   - name: set root password
     user:
