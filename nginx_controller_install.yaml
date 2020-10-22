@@ -50,8 +50,8 @@
   become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
   gather_facts: false
   
-  roles:
-    - nginxinc.nginx_controller_install
+  collections:
+    - nginxinc.nginx_controller
 
   vars:
     - nginx_controller_tarball: "{{nginx_controller_tarball}}"
