@@ -14,8 +14,7 @@
       group: ubuntu
       force: yes
     vars:
-      nginx_controller_install_path: "{{ ansible_env.HOME }}"
-      nginx_controller_tarball: "controller-installer-<>.tar.gz"
+      nginx_controller_tarball: "controller-installer-3.9.0.tar.gz"
 
   - name: set root password
     user:
@@ -31,4 +30,4 @@
       force: yes
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
-      nginx_controller_tarball: "controller-installer-<>.tar.gz"
+      nginx_controller_tarball: "controller-installer-3.9.0.tar.gz"
