@@ -54,7 +54,7 @@
     - nginxinc.nginx_controller_install
 
   vars:
-    - nginx_controller_tarball: "/opt/controller-installer-3.9.0.tar"
+    - nginx_controller_tarball: "{{nginx_controller_tarball}}"
     - nginx_controller_install_path: "/usr/azureuser"
     - nginx_controller_db_host: 127.0.0.1
     - nginx_controller_db_user: "controller"
