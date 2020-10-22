@@ -53,7 +53,7 @@
   collections:
     - nginxinc.nginx_controller
   
-  roles:
+  role:
     - nginxinc.nginx_controller_install
 
   vars:
