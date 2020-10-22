@@ -20,7 +20,7 @@
       force: yes
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
-      nginx_controller_tarball: "controller-installer-3.9.0.tar"
+      nginx_controller_tarball: "/opt/controller-installer-3.9.0.tar"
       
   - name:  make sure all the prerequisites are present on the remote
     apt:
