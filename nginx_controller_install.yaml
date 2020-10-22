@@ -21,3 +21,22 @@
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
       nginx_controller_tarball: "controller-installer-3.9.0.tar"
+      
+  - name:  make sure all the prerequisites are present on the remote
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - gettext
+      - bash
+      - gzip
+      - coreutils
+      - grep
+      - less
+      - sed
+      - tar
+      - python-pexpect  # to support ansible
+      - nfs-common  # to support nfs remote volume
+    tags: packages
