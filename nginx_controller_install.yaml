@@ -6,14 +6,6 @@
 
   tasks:  
   
-  - name: copy the controller tar archive to the Ansible tower playbook
-    copy:
-      src: "/opt/{{nginx_controller_tarball}}"
-      dest: "{{playbook_dir}}/{{nginx_controller_tarball}}"
-      force: yes
-    vars:
-      nginx_controller_tarball: "controller-installer-3.9.0.tar"
-
   - name: set root password
     user:
       name: root
@@ -21,11 +13,11 @@
      
   - name: copy the controller tar archive to the remote host
     copy:
-      src: "{{playbook_dir}}/{{nginx_controller_tarball}}"
+      src: "/opt/{{nginx_controller_tarball}}"
       dest: "{{ ansible_env.HOME }}/{{nginx_controller_tarball}}"
       owner: ubuntu
       group: ubuntu
       force: yes
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
-      nginx_controller_tarball: "controller-installer-3.9.0.tar.gz"
+      nginx_controller_tarball: "controller-installer-3.9.0.tar"
