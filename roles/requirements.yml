@@ -1,2 +1,3 @@
 # from galaxy
 - name: nginxinc.nginx_controller_install
+  source: https://galaxy.ansible.com
