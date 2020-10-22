@@ -42,10 +42,10 @@
     tags: packages
 
 ## changing security context on the remote host to su to run the installer
-  - name: install controller
-    remote_user: azureuser
-    hosts: all
-    become: yes
-    become_user: azureuser
-    become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
-    gather_facts: false
+- name: install controller
+  remote_user: azureuser
+  hosts: all
+  become: yes
+  become_user: azureuser
+  become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
+  gather_facts: false
