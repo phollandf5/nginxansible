@@ -49,3 +49,32 @@
   become_user: azureuser
   become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
   gather_facts: false
+  
+  roles:
+    - nginxinc.nginx_controller_install
+
+  vars:
+    - nginx_controller_tarball: "/opt/{{nginx_controller_tarball}}"
+    - nginx_controller_install_path: /usr/azureuser
+    - nginx_controller_db_host: 127.0.0.1
+    - nginx_controller_db_user: "controller"
+    - nginx_controller_db_password: 'sc00byd00'
+    - nginx_controller_db_enable_ssl: false
+    - nginx_controller_tsdb_volume_type: local
+    - nginx_controller_tsdb_nfs_path: "/controllerdb"
+    - nginx_controller_tsdb_nfs_host: storage.internal
+    - nginx_controller_smtp_host: "localhost"
+    - nginx_controller_smtp_authentication: false
+    - nginx_controller_smtp_use_tls: false
+    - nginx_controller_noreply_address: "noreply@example.com"
+    - nginx_controller_fqdn:  "nginxcontroller.northeurope.cloudapp.azure.com"
+    - nginx_controller_organization_name: "f5"
+    - nginx_controller_admin_firstname: "Paul"
+    - nginx_controller_admin_lastname: "Holland"
+    - nginx_controller_admin_email: "p.holland@f5.com"
+    - nginx_controller_admin_password: 'sc00byd00'
+    - nginx_controller_self_signed_cert: true
+    - nginx_controller_overwrite_existing_configs: true
+    - ansible_python_interpreter: /usr/bin/python3
+    - ansible_become_password: 'sc00byd00'
+
