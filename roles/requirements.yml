@@ -1,4 +1,2 @@
 # from galaxy
-- name: nginxinc.nginx_controller_install
-  source: https://galaxy.ansible.com
-  version: 3.7.5
+- name: nginxinc.nginx_controller
