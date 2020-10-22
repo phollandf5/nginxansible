@@ -12,7 +12,7 @@
       dest: "{{playbook_dir}}/{{nginx_controller_tarball}}"
       force: yes
     vars:
-      nginx_controller_tarball: "controller-installer-3.9.0.tar.gz"
+      nginx_controller_tarball: "controller-installer-3.9.0.tar"
 
   - name: set root password
     user:
