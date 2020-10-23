@@ -1,4 +1,5 @@
 ---
 roles:
 - name: nginxinc.nginx_controller_install
-- src: https://github.com/nginxinc/ansible-role-nginx-controller-install
+  src: https://github.com/nginxinc/ansible-role-nginx-controller-install
+  type: git
