@@ -39,6 +39,7 @@
       - tar
       - python-pexpect  # to support ansible
       - nfs-common  # to support nfs remote volume
+      - jq
     tags: packages
 
 ## changing security context on the remote host to su to run the installer
