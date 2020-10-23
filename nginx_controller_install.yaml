@@ -53,9 +53,6 @@
   collections:
     - nginxinc.nginx_controller
   
-  roles:
-    - nginxinc.nginx_controller_install
-
   vars:
     - nginx_controller_tarball: "{{nginx_controller_tarball}}"
     - nginx_controller_install_path: "/usr/azureuser"
