@@ -1,3 +1,2 @@
 ---
-collections:
-- name: nginxinc.nginx_controller
+name: nginxinc.nginx_controller
