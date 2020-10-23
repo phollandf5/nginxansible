@@ -82,4 +82,5 @@
     - ansible_python_interpreter: /usr/bin/python3
     - ansible_become_password: 'sc00byd00'
     - nginx_controller_remote_source: yes
+    - nginx_controller_auto_install_docker: true
 
