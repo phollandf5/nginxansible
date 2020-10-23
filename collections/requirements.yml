@@ -1,4 +1,0 @@
----
-collections:
-- name: nginxinc.nginx_controller
-- src: https://github.com/nginxinc/ansible-collection-nginx_controller
