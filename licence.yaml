@@ -9,9 +9,13 @@
 
   tasks:
     - name: Retrieve the NGINX Controller auth token
-      include_role:
-        name: nginxinc.nginx_controller_generate_token
-
+        
+      collections:
+        - nginxinc.nginx_controller
+    
+      roles:
+        - nginxinc.nginx_controller_generate_token
+    
     - name: Push the NGINX Controller license to your instance
       include_role:
         name: nginxinc.nginx_controller_license
