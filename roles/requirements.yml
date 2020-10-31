@@ -7,3 +7,7 @@ roles:
 - name: nginxinc.nginxinc.nginx_controller_license
   src: https://github.com/nginxinc/ansible-role-nginx-controller-license
   type: git
+  
+- name: nginxinc.nginxinc.nginx_controller_license
+  src: https://github.com/nginxinc/ansible-role-nginx-controller-generate-token
+  type: git
