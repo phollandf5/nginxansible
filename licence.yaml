@@ -1,13 +1,9 @@
-- hosts: all
-  remote_user: azureuser
-  become: yes
-  become_method: sudo
-  gather_facts: yes
-  
+- name: update web servers
+  hosts: all
+
   tasks: 
 
   - name: Retrieve the NGINX Controller auth token  
-    hosts: all
    
     vars:
       nginx_controller_user_email: "p.holland@f5.com"
