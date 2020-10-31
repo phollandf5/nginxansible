@@ -60,7 +60,7 @@
   vars:
     - nginx_controller_tarball: "/opt/controller-installer-3.9.0.tar"
     - nginx_controller_install_path: "/home/azureuser"
-    - nginx_controller_db_host: "nginxcontroller.northeurope.cloudapp.azure.com"
+    - nginx_controller_db_host: "172.16.30.10"
     - nginx_controller_db_user: "controller"
     - nginx_controller_db_password: 'sc00byd00'
     - nginx_controller_db_enable_ssl: false
