@@ -7,11 +7,11 @@
     nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
     nginx_controller_validate_certs: false
   
-    collections:
-      - nginxinc.nginx_controller
-  
-    roles:
-      - nginxinc.nginx_controller_generate_token
+  collections:
+    - nginxinc.nginx_controller
+ 
+ roles:
+   - nginxinc.nginx_controller_generate_token
       
 - name: Push the NGINX Controller license to your instance
   hosts: all
