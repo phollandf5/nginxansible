@@ -13,8 +13,8 @@
      
   - name: copy the controller tar archive to the remote host
     copy:
-      src: "/home/azureuser/controller_license.txt"
-      dest: "/home/azureuser/controller_license.txt"
+      src: "/opt/controller_license.txt"
+      dest: "/opt/controller_license.txt"
       owner: azureuser
       group: azureuser
       force: yes
@@ -45,4 +45,4 @@
     nginx_controller_user_password: "sc00byd00"
     nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
     nginx_controller_validate_certs: false     # controller.auth_token: output by previous role in example
-    nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
+    nginx_controller_license: "{{ lookup('file', '/opt/controller_license.txt') | b64encode }}"
