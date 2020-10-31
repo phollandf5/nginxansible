@@ -2,9 +2,7 @@
   hosts: all
 
   tasks: 
-
   - name: Retrieve the NGINX Controller auth token  
-   
     vars:
       nginx_controller_user_email: "p.holland@f5.com"
       nginx_controller_user_password: "sc00byd00"
