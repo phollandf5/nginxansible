@@ -10,8 +10,8 @@
   collections:
     - nginxinc.nginx_controller
  
- roles:
-   - nginxinc.nginx_controller_generate_token
+  roles:
+    - nginxinc.nginx_controller_generate_token
       
 - name: Push the NGINX Controller license to your instance
   hosts: all
