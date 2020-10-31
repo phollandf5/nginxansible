@@ -12,19 +12,19 @@
   
   tasks: 
 
-  - name: Retrieve the NGINX Controller auth token
-          
-    collections:
-      - nginxinc.nginx_controller
-    
-    roles:
-      - nginxinc.nginx_controller_generate_token
-    
-  - name: Push the NGINX Controller license to your instance
-    
-    roles:
-      - nginxinc.nginx_controller_license
+    - name: Retrieve the NGINX Controller auth token
+            
+      collections:
+        - nginxinc.nginx_controller
       
-    vars:
-      # controller.auth_token: output by previous role in example
-      nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
+      roles:
+        - nginxinc.nginx_controller_generate_token
+      
+    - name: Push the NGINX Controller license to your instance
+      
+      roles:
+        - nginxinc.nginx_controller_license
+        
+      vars:
+        # controller.auth_token: output by previous role in example
+        nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
