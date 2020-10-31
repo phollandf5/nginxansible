@@ -1,3 +1,13 @@
+- name: copy the controller tar archive to the remote host
+  hosts: all
+  copy:
+    src: "/home/azureuser/controller_license.txt"
+    dest: "/home/azureuser/controller_license.txt"
+    owner: azureuser
+    group: azureuser
+    force: yes
+
+
 - name: Retrieve the NGINX Controller auth token
   hosts: all
 
