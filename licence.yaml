@@ -22,8 +22,8 @@
   
 - name: Push the NGINX Controller license to your instance
   
-  include_role:
-    name: nginxinc.nginx_controller_license
+  roles:
+    - nginxinc.nginx_controller_license
     
   vars:
     # controller.auth_token: output by previous role in example
