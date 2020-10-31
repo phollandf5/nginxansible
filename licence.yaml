@@ -34,5 +34,5 @@
     - nginxinc.nginx_controller_license
   
   vars:
-        # controller.auth_token: output by previous role in example
-        nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
+    # controller.auth_token: output by previous role in example
+    nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
