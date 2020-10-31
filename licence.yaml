@@ -6,20 +6,20 @@
   
   tasks: 
 
-- name: Retrieve the NGINX Controller auth token  
-  hosts: all
+  - name: Retrieve the NGINX Controller auth token  
+    hosts: all
+   
+    vars:
+      nginx_controller_user_email: "p.holland@f5.com"
+      nginx_controller_user_password: "sc00byd00"
+      nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
+      nginx_controller_validate_certs: false
   
-  vars:
-    nginx_controller_user_email: "p.holland@f5.com"
-    nginx_controller_user_password: "sc00byd00"
-    nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
-    nginx_controller_validate_certs: false
+    collections:
+      - nginxinc.nginx_controller
   
-  collections:
-    - nginxinc.nginx_controller
-  
-  roles:
-    - nginxinc.nginx_controller_generate_token
+    roles:
+      - nginxinc.nginx_controller_generate_token
       
 - name: Push the NGINX Controller license to your instance
   hosts: all
