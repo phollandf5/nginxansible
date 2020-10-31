@@ -14,6 +14,7 @@
 
 - name: Retrieve the NGINX Controller auth token  
   hosts: all
+  
   collections:
     - nginxinc.nginx_controller
   
@@ -22,8 +23,10 @@
       
 - name: Push the NGINX Controller license to your instance
   hosts: all
+  
   roles:
     - nginxinc.nginx_controller_license
-      vars:
+  
+  vars:
         # controller.auth_token: output by previous role in example
         nginx_controller_license: "{{ lookup('file', '/home/azureuser/controller_license.txt') | b64encode }}"
