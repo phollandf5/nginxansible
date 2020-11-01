@@ -1,5 +1,5 @@
 - hosts: all
-  remote_user: azureuser
+  remote_user: ubuntu
   become: yes
   become_method: sudo
   gather_facts: yes
@@ -15,8 +15,8 @@
     copy:
       src: "{{nginx_controller_tarball}}"
       dest: "{{nginx_controller_tarball}}"
-      owner: azureuser
-      group: azureuser
+      owner: ubuntu
+      group: ubuntu
       force: yes
     vars:
       nginx_controller_install_path: "{{ ansible_env.HOME }}"
@@ -46,10 +46,10 @@
 
 ## changing security context on the remote host to su to run the installer
 - name: install controller
-  remote_user: azureuser
+  remote_user: ubuntu
   hosts: all
   become: yes
-  become_user: azureuser
+  become_user: ubuntu
   become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
   gather_facts: false
   
