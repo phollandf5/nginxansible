@@ -1,5 +1,5 @@
 - hosts: all
-  remote_user: azureuser
+  remote_user: ubuntu
   become: yes
   become_method: sudo
   gather_facts: yes
@@ -15,8 +15,8 @@
     copy:
       src: "/opt/controller_license.txt"
       dest: "/opt/controller_license.txt"
-      owner: azureuser
-      group: azureuser
+      owner: ubuntu
+      group: ubuntu
       force: yes
 
 - name: Retrieve the NGINX Controller auth token
