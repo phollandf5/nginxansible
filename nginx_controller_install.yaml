@@ -58,31 +58,4 @@
     
   roles:
     - nginxinc.nginx_controller_install
-  
-  vars:
-    - nginx_controller_tarball: "/opt/controller-installer-3.9.0.tar"
-    - nginx_controller_install_path: "/home/azureuser"
-    - nginx_controller_db_host: "172.16.30.10"
-    - nginx_controller_db_user: "controller"
-    - nginx_controller_db_password: 'controller'
-    - nginx_controller_db_enable_ssl: false
-    - nginx_controller_tsdb_volume_type: local
-    - nginx_controller_tsdb_nfs_path: "/controllerdb"
-    - nginx_controller_tsdb_nfs_host: storage.internal
-    - nginx_controller_smtp_host: "localhost"
-    - nginx_controller_smtp_authentication: false
-    - nginx_controller_smtp_use_tls: false
-    - nginx_controller_noreply_address: "noreply@example.com"
-    - nginx_controller_fqdn:  "nginxcontroller.northeurope.cloudapp.azure.com"
-    - nginx_controller_organization_name: "f5"
-    - nginx_controller_admin_firstname: "Paul"
-    - nginx_controller_admin_lastname: "Holland"
-    - nginx_controller_admin_email: "p.holland@f5.com"
-    - nginx_controller_admin_password: 'sc00byd00'
-    - nginx_controller_self_signed_cert: true
-    - nginx_controller_overwrite_existing_configs: true
-    - ansible_python_interpreter: /usr/bin/python3
-    - ansible_become_password: 'sc00byd00'
-    - nginx_controller_remote_source: yes
-    - nginx_controller_auto_install_docker: true
 
