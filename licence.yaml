@@ -21,12 +21,6 @@
 
 - name: Retrieve the NGINX Controller auth token
   hosts: all
-
-  vars:
-    nginx_controller_user_email: "p.holland@f5.com"
-    nginx_controller_user_password: "sc00byd00"
-    nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
-    nginx_controller_validate_certs: false
   
   collections:
     - nginxinc.nginx_controller
@@ -41,8 +35,4 @@
     - nginxinc.nginx_controller_license
   
   vars:
-    nginx_controller_user_email: "p.holland@f5.com"
-    nginx_controller_user_password: "sc00byd00"
-    nginx_controller_fqdn: "nginxcontroller.northeurope.cloudapp.azure.com"
-    nginx_controller_validate_certs: false     # controller.auth_token: output by previous role in example
     nginx_controller_license: "{{ lookup('file', '/opt/controller_license.txt') | b64encode }}"
