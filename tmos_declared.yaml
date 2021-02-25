@@ -1,0 +1,67 @@
+#cloud-config
+tmos_declared:
+  enabled: true
+  icontrollx_trusted_sources: false
+  icontrollx_package_urls:
+    - "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.15.0/f5-declarative-onboarding-1.15.0-3.noarch.rpm"
+  do_declaration:
+    schemaVersion: 1.0.0
+    class: Device
+    async: true
+    label: Cloudinit Onboarding
+    Common:
+      class: Tenant
+      provisioningLevels:
+        class: Provision
+        ltm: nominal
+        gtm: nominal
+      poolLicense:
+        class: License
+        licenseType: regKey
+        regkey: TPQPK-SYDLN-ENBQW-XFEKR-BCRGFFJ
+      dnsServers:
+        class: DNS
+        nameServers:
+          - 8.8.8.8
+        search:
+          - example.openstack.com
+      ntpServers:
+        class: NTP
+        servers:
+          - 0.pool.ntp.org
+          - 1.pool.ntp.org
+          - 2.pool.ntp.org
+      internal:
+        class: VLAN
+        mtu: 1450
+        interfaces:
+          - name: 1.1
+            tagged: false
+      internal-self:
+        class: SelfIp
+        address: 10.9.10.10/24
+        vlan: internal
+        allowService: default
+        trafficGroup: traffic-group-local-only
+      external:
+        class: VLAN
+        mtu: 1450
+        interfaces:
+          - name: 1.2
+            tagged: false
+      external-self:
+        class: SelfIp
+        address: 10.9.20.10/24
+        vlan: external
+        allowService: none
+        trafficGroup: traffic-group-local-only
+      default:
+        class: Route
+        gw: 10.9.1.1
+        network: default
+        mtu: 1500
+      dbvars:
+        class: DbVariables
+        ui.advisory.enabled: true
+        ui.advisory.color: orange
+        ui.advisory.text: This device is under centralized management

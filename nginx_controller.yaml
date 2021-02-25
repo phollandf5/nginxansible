@@ -1,0 +1,314 @@
+---
+
+- hosts: localhost
+  connection: local
+
+  gather_facts: false
+
+  vars:
+    uk_se_name: dutch
+    key_name: my_aws
+    image: ami-0e169fa5b2b2f88ae
+    id: "controller_app_10"
+    sec_group: "{{ id }}-sec"
+    cidr_block: 10.9.0.0/16
+    whatismyip: 86.21.125.243/32
+    cidr_block_mgmt_subnet: 10.9.10.0/24
+    igw_name: dutch_igw
+
+
+  vars_files:
+    - ../creds/aws_creds.yaml
+
+  tasks:
+
+    - name: Provision EC2 instances 
+      block:
+
+        - name: Upload public key to aws_access_key
+          ec2_key:
+            name: "{{ key_name }}"
+            key_material: "{{ lookup('file', '~/.ssh/{{ key_name }}.pub') }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+
+        - name: Create VPC
+          ec2_vpc_net:
+            name: dutch_controller
+            cidr_block: "{{ cidr_block }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: vpc_object
+
+        - name: Create mgmt subnet
+          ec2_vpc_subnet:
+            state: present
+            tags:
+              Name: mgmt subnet
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            cidr: "{{ cidr_block_mgmt_subnet }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: mgmt_subnet  
+
+        - name: Create security sec_group
+          ec2_group:
+            name: "{{ sec_group }}"
+            description: "Security group for NGINX controller"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            rules:
+              - proto: tcp
+                ports:
+                  - 22
+                cidr_ip: "{{ whatismyip }}"
+                rule_desc: allow my cidr_ip
+              - proto: tcp
+                ports:
+                  - 443
+                cidr_ip: "{{ whatismyip }}"
+                rule_desc: allow my cidr_ip tcp 443
+              - proto: tcp
+                ports:
+                  - 8443
+                cidr_ip: "{{ whatismyip }}"
+                rule_desc: allow agent install
+              - proto: tcp
+                ports:
+                  - 8443
+                cidr_ip: "{{ cidr_block }}"
+                rule_desc: allow agent install
+              - proto: tcp
+                ports:
+                  - 443
+                cidr_ip: "{{ cidr_block }}"
+                rule_desc: allow agent install ports
+          register: result_sec_group
+
+        - name: Create an Internet gateway
+          community.aws.ec2_vpc_igw:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+          register: igw
+
+        - name: Set up public subnet route table
+          community.aws.ec2_vpc_route_table:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            region: "{{ region }}"
+            tags:
+              Name: Public
+            subnets:
+              - "{{ mgmt_subnet.subnet.id }}"
+            routes:
+              - dest: 0.0.0.0/0
+                gateway_id: "{{ igw.gateway_id }}"
+          register: public_route_table
+
+        - name: Provision instance
+          ec2:
+            key_name: "{{ key_name }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            id: "{{ id }}"
+            group_id: "{{ result_sec_group.group_id }}"
+            image: "{{ image }}"
+            instance_type: t2.2xlarge
+            vpc_subnet_id: "{{ mgmt_subnet.subnet.id }}"
+            wait: true
+            count: 1
+            assign_public_ip: yes
+            volumes:
+              - device_name: /dev/sda1
+                volume_type: gp2
+                volume_size: 32
+            instance_tags:
+              type: ubuntu-server
+              Name: "{{uk_se_name}}-controller"
+              uk_se: "{{ uk_se_name }}"
+          register: ec2_facts
+
+        - name: WAIT FOR SSH TO BECOME AVAILABLE
+          wait_for:
+            host: "{{ item.public_ip }}"
+            port: 22
+            delay: 10
+            sleep: 10
+            timeout: 600
+            msg: "Failed to detect SSH port open"
+          loop: "{{ ec2_facts.instances }}"
+
+        - name: simple PUT operation
+          amazon.aws.aws_s3:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            bucket: dutch-bucket
+            object: /controller_license.txt
+            src: ~/Downloads/controller_license.txt
+            mode: put
+
+        - name: simple PUT operation
+          amazon.aws.aws_s3:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            bucket: dutch-bucket
+            object: /controller-installer-3.13.0.tar
+            src: ~/Downloads/controller-installer-3.13.0.tar
+            mode: put
+            overwrite: false
+
+        - name: add instances to host group
+          add_host:
+            hostname: "{{ item.public_ip }}"
+            private_ip: "{{ item.private_ip }}"
+            public_dns_name: "{{ item.public_dns_name }}"
+            key_name: "{{ key_name }}"
+            ansible_user: ubuntu
+            ansible_python_interpreter: "/usr/bin/python3"
+            ansible_ssh_private_key_file: "~/.ssh/{{ key_name }}"
+            groupname: controller_instances_ec2
+          loop: "{{ ec2_facts.instances }}"
+
+- hosts: controller_instances_ec2
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+
+  vars_files:
+  - ../creds/postgres.yaml
+  - ../creds/aws_creds.yaml
+
+  vars:
+  - su_password: "sc00byd00"
+  
+  tasks:
+
+    - name: set root password to support su for Controller installation with Ubuntu
+      user:
+        name: root
+        password: "{{ su_password | password_hash('sha512') }}"
+
+    - name: update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: update and upgrade apt packages
+      apt:
+        pkg:
+        - python3-boto3
+        - python3-botocore
+
+    - name: simple GET operation
+      amazon.aws.aws_s3:
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        security_token: "{{ aws_session_token }}"
+        region: "{{ region }}"
+        bucket: dutch-bucket
+        object: /controller-installer-3.13.0.tar
+        dest: /opt/controller-installer-3.13.0.tar
+        mode: get
+        overwrite: false
+
+    - name: simple GET operation
+      amazon.aws.aws_s3:
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        security_token: "{{ aws_session_token }}"
+        region: "{{ region }}"
+        bucket: dutch-bucket
+        object: /controller_license.txt
+        dest: /opt/controller_license.txt
+        mode: get
+        overwrite: false
+
+    - name: install postgresql  
+      include_role:
+        name: geerlingguy.postgresql
+
+    - name:  make sure all the prerequisites are present on the remote for controller
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+        - gettext
+        - bash
+        - gzip
+        - coreutils
+        - grep
+        - less
+        - sed
+        - tar
+        - python-pexpect  # to support ansible
+        - nfs-common  # to support nfs remote volume
+        - jq
+        - socat
+        - conntrack
+      tags: packages
+
+- name: install controller
+  remote_user: ubuntu
+  hosts: controller_instances_ec2
+  #hosts: localhost
+  become: yes
+  become_user: ubuntu
+  become_method: su  # note that the become method is required to be su, you will need to support that for your distribution.
+  gather_facts: false
+
+  vars:
+  - nginx_controller_install_path: "{{ ansible_env.HOME }}"
+  - nginx_controller_tarball: "/opt/controller-installer-3.13.0.tar"
+  - nginx_controller_install_path: /home/ubuntu
+  - nginx_controller_db_host: "{{hostvars[inventory_hostname]['private_ip']}}"
+  - nginx_controller_db_enable_ssl: false
+  - nginx_controller_tsdb_volume_type: local
+  #- nginx_controller_tsdb_nfs_path: "/controllerdb"
+  #- nginx_controller_tsdb_nfs_host: "{{hostvars[inventory_hostname]['private_ip']}}"
+  - nginx_controller_smtp_host: "localhost"
+  - nginx_controller_smtp_authentication: false
+  - nginx_controller_smtp_use_tls: false
+  - nginx_controller_noreply_address: "noreply@example.com"
+  - nginx_controller_fqdn:  "{{hostvars[inventory_hostname]['public_dns_name']}}"
+  - nginx_controller_organization_name: "Example"
+  - nginx_controller_self_signed_cert: true
+  - nginx_controller_overwrite_existing_configs: true
+  - ansible_python_interpreter: /usr/bin/python3
+  - ansible_become_password: '<some secure password>'
+  - nginx_controller_auto_install_docker: true
+  - nginx_controller_license: "{{ lookup('file','~/Downloads/controller_license.txt') | b64encode }}"
+  - nginx_controller_validate_certs: false
+
+  vars_files:
+    - ../creds/controller.yaml
+
+  roles:
+    - ansible-role-nginx-controller-install
+    - nginxinc.nginx_controller_generate_token
+    - nginxinc.nginx_controller_license
+
+
+

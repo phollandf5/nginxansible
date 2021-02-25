@@ -1,0 +1,214 @@
+---
+
+- hosts: localhost
+  connection: local
+
+  gather_facts: false
+
+  vars:
+    uk_se_name: dutch
+    key_name: my_aws
+    image: ami-0da86f545776ff2e5
+    id: "big-ip"
+    sec_group: "{{ id }}-sec"
+    cidr_block: 10.9.0.0/16
+    whatismyip: 86.21.125.243/32
+    cidr_block_mgmt_subnet: 10.9.1.0/24
+    cidr_block_internal_subnet: 10.9.10.0/24
+    cidr_block_external_subnet: 10.9.20.0/24
+    igw_name: dutch_igw
+    instance_type: "m4.2xlarge"
+
+
+  vars_files:
+    - ../creds/aws_creds.yaml
+
+  tasks:
+
+    - name: Provision EC2 instances 
+      block:
+
+        - name: Upload public key to aws_access_key
+          ec2_key:
+            name: "{{ key_name }}"
+            key_material: "{{ lookup('file', '~/.ssh/{{ key_name }}.pub') }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+
+        - name: Create VPC
+          ec2_vpc_net:
+            name: dutch_controller
+            cidr_block: "{{ cidr_block }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: vpc_object
+
+        - name: debug
+          debug:  
+            msg: "{{ vpc_object }}"
+
+        - name: Create mgmt subnet
+          ec2_vpc_subnet:
+            state: present
+            tags:
+              Name: mgmt subnet
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            cidr: "{{ cidr_block_mgmt_subnet }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: mgmt_subnet 
+
+        - name: debug
+          debug:  
+            msg: "{{ mgmt_subnet  }}"
+
+        - name: Create internal subnet
+          ec2_vpc_subnet:
+            state: present
+            tags:
+              Name: internal subnet
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            cidr: "{{ cidr_block_internal_subnet }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: internal_subnet  
+
+        - name: Create external subnet
+          ec2_vpc_subnet:
+            state: present
+            tags:
+              Name: external subnet
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            cidr: "{{ cidr_block_external_subnet }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+          register: external_subnet 
+
+        - name: Create security sec_group
+          ec2_group:
+            name: "{{ sec_group }}"
+            description: "Security group for NGINX controller"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            region: "{{ region }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            rules:
+              - proto: tcp
+                ports:
+                  - 443
+                cidr_ip: "{{ whatismyip }}"
+                rule_desc: allow my cidr_ip tcp 443
+              - proto: tcp
+                ports:
+                  - 22
+                cidr_ip: "{{ whatismyip }}"
+                rule_desc: allow my cidr_ip tcp 22
+          register: result_sec_group
+
+        - name: Create an Internet gateway
+          community.aws.ec2_vpc_igw:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+          register: igw
+
+        - name: Set up public subnet route table
+          community.aws.ec2_vpc_route_table:
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            vpc_id: "{{ vpc_object.vpc.id }}"
+            region: "{{ region }}"
+            tags:
+              Name: Public
+            subnets:
+              - "{{ mgmt_subnet.subnet.id }}"
+            routes:
+              - dest: 0.0.0.0/0
+                gateway_id: "{{ igw.gateway_id }}"
+          register: public_route_table
+
+        - name: Provision instance
+          ec2:
+            key_name: "{{ key_name }}"
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            security_token: "{{ aws_session_token }}"
+            region: "{{ region }}"
+            id: "{{ id }}"
+            group_id: "{{ result_sec_group.group_id }}"
+            image: "{{ image }}"
+            instance_type: "{{ instance_type }}"
+            vpc_subnet_id: "{{ mgmt_subnet.subnet.id }}"
+            wait: true
+            count: 1
+            assign_public_ip: yes
+            instance_tags:
+              type: big-ip
+              name: "{{uk_se_name}}-big-ip"
+              uk_se: "{{ uk_se_name }}"
+          register: ec2_facts
+
+        - name: WAIT FOR SSH TO BECOME AVAILABLE
+          wait_for:
+            host: "{{ item.public_ip }}"
+            port: 22
+            delay: 10
+            sleep: 10
+            timeout: 600
+            msg: "Failed to detect SSH port open"
+          loop: "{{ ec2_facts.instances }}"
+
+        - name: add instances to host group
+          add_host:
+            hostname: "{{ item.public_ip }}"
+            private_ip: "{{ item.private_ip }}"
+            public_dns_name: "{{ item.public_dns_name }}"
+            key_name: "{{ key_name }}"
+            ansible_user: admin
+            ansible_python_interpreter: "/usr/bin/python3"
+            ansible_ssh_private_key_file: "~/.ssh/{{ key_name }}"
+            groupname: bigip_instances_ec2
+          loop: "{{ ec2_facts.instances }}"
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars_files:
+  - ../creds/aws_creds.yaml
+
+  tasks:
+
+    - debug: var=hostvars['localhost']['vpc_object']
+
+    - name: create interfaces
+      amazon.aws.ec2_eni:
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        security_token: "{{ aws_session_token }}"
+        #vpc_id: "{{ hostvars['localhost']['vpc_object']['vpc']['id'] }}"
+        region: "{{ region }}"            
+        instance_id: i-01fc99d70e0bba48d
+        device_index: 1
+        private_ip_address: 10.9.10.10
+        subnet_id: "{{ hostvars['localhost']['internal_subnet']['subnet']['id'] }}"
+        #subnet_id: subnet-05c3986fa7755fcd3
+        state: present
+        attached: yes
+
+ 
+  
